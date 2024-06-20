@@ -20,18 +20,18 @@ class BusineSeeder extends Seeder
                 'razon_social'      => 'Oscar Esliban De Los Santos Shapiama',
                 'direccion'         => ' A.H. ARRIBA PERU -CAL. 37 ,Mz 9 Lote 9  , 	SAN JUAN DE LURIGANCHO',
                 'codigo_pais'       => 'PE',
-                'ubigeo'            => '150132',
+                'ubigeo'            => '150101',
                 'telefono'          => '', 
                 'url_api'           => 'https://test.mytems.cloud/', 
                 'email_accounting'  => 'oscarsistemas0000@gmail.com',
                 'urbanizacion'      => '',
                 'local'             => '',
                 'nombre_comercial'  => 'Oscar Santos',
-                'usuario_sunat'     => 'FACTURAS',
-                'clave_sunat'       => 'Factura2',
+                'usuario_sunat'     => 'HEYDI010',
+                'clave_sunat'       => 'Heydi0102',
                 'clave_certificado' => 'Alva123456',
                 'certificado'       => '10753330459.pfx',
-                'servidor_sunat'    => 1,
+                'servidor_sunat'    => 3,
                 'pago'              => 1
             ]
         ];

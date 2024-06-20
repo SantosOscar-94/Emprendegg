@@ -37,6 +37,17 @@
                     data        : 'descripcion',
                     className   : 'text-left'
                 },
+                  
+                {
+                    data        : 'direccion',
+                    className   : 'text-left'
+                },
+
+                {
+                    data        : 'telefono',
+                    className   : 'text-left'
+                },
+
                 {
                     data        : 'acciones',
                     className   : 'text-center'

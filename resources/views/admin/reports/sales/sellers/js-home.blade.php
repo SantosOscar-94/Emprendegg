@@ -49,6 +49,8 @@
                     }
                     html_tbody += `<tr class="${tachado}">
                             <td class="text-center">${moment(billing.fecha_emision).format('DD-MM-yyyy')}</td>
+                            <td class="text-center">${billing.idusuario}</td>
+                            
                             <td class="text-center">${billing.serie}-${billing.correlativo}</td>
                             <td>`;
                             $.each(r.pagos, function(i, pago){

@@ -620,6 +620,36 @@ class SaleReportController extends Controller
         ]);
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     public function export_sales_seller(Request $request)
     {
         $fecha_inicial              = $request->input('fecha_inicial');

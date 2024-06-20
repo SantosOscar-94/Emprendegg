@@ -30,8 +30,19 @@
                                         value="{{ date('Y-m-t') }}">
                                 </div>
 
-                                <div class="col-12 col-md-5 mb-3">
+                                <div class="col-6 col-md-2 mb-3">
                                     <label class="form-label" for="iduser">Vendedor</label>
+                                    <select class="select2-size-sm form-control" id="iduser" name="iduser">
+                                        <option value="0">TODOS</option>
+                                        @foreach ($sellers as $seller)
+                                            <option value="{{ $seller->id }}">
+                                                {{ $seller->nombres }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-6 col-md-2 mb-3">
+                                    <label class="form-label" for="iduser">Tienda</label>
                                     <select class="select2-size-sm form-control" id="iduser" name="iduser">
                                         <option value="0">TODOS</option>
                                         @foreach ($sellers as $seller)
@@ -101,6 +112,8 @@
                                             </tr>
                                             <tr>
                                                 <th class="text-center">Fecha</th>
+                                                <th class="text-center">Vendedor</th> 
+                                                
                                                 <th class="text-center">Documento</th>
                                                 <th class="text-center">Pago</th>
                                                 <th class="text-center">RUC / DNI</th>

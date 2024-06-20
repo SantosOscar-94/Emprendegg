@@ -10,13 +10,26 @@
         event.preventDefault();
         let form            = $('#form_save').serialize(),
             descripcion     = $('#form_save input[name="descripcion"]');
+            direccion       =$('#form_save input[name="direccion"]');
+            telefono        =$('#form_save input[name="telefono"]');
 
         if(descripcion.val() == '')
             descripcion.addClass('is-invalid');
         else
             descripcion.removeClass('is-invalid');
 
-        if(descripcion.val().trim() != '')
+        if(direccion.val() == '')
+        direccion.addClass('is-invalid');
+        else
+        direccion.removeClass('is-invalid');
+
+        if(telefono.val() == '')
+        telefono.addClass('is-invalid');
+        else
+        telefono.removeClass('is-invalid');
+            
+
+        if(descripcion.val().trim() != '' && direccion.val().trim() != '' && telefono.val().trim()!= '')
         {
             $.ajax({
                 url         :  "{{ route('admin.save_warehouse') }}",
@@ -73,6 +86,8 @@
                 close_block('#layout-content');
                 $('#form_edit input[name="id"]').val(r.warehouse.id);
                 $('#form_edit input[name="descripcion"]').val(r.warehouse.descripcion);
+                $('#form_edit input[name="direccion"]').val(r.warehouse.direccion);
+                $('#form_edit input[name="telefono"]').val(r.warehouse.telefono);
                 $('#modalEditWarehouse').modal('show');
             },
             dataType    : 'json'

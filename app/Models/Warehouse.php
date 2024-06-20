@@ -12,6 +12,8 @@ class Warehouse extends Model
     protected $primaryKey   = 'id';
     protected $fillable     = 
     [
-        'descripcion'
+        'descripcion',
+         'direccion',
+        'telefono'
     ];
 }

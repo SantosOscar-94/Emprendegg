@@ -16,14 +16,24 @@ class WarehouseSeeder extends Seeder
         $warehouses =
         [
             [
-                'descripcion'           => 'Tienda Principal'
+                'descripcion'           => 'Tienda Principal',
+                'direccion'             =>  'Av. Sentimientos',
+                'telefono'             =>  '9999999999'
             ],
             [
-                'descripcion'           => 'Tienda 02'
+                'descripcion'           => 'Tienda 02',
+                'direccion'             =>  'Av. Palomar',
+                'telefono'             =>  '9999999999'
             ],
             [
-                'descripcion'           => 'Tienda 03'
+                'descripcion'           => 'Tienda 03',
+                'direccion'             =>  'Av. Rinconada',
+                'telefono'             =>  '9999999999'
             ],
+
+
+
+
         ];
 
         foreach($warehouses as $store)

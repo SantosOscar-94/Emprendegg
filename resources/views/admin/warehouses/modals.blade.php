@@ -8,13 +8,25 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-12 mb-3">
+                    <div class="col-6 mb-3">
                         <label for="descripcion" class="form-label">Descripci&oacute;n</label>
                         <input type="text" id="descripcion" class="form-control text-uppercase" name="descripcion">
                         <div class="invalid-feedback">El campo no debe estar vacío.</div>
                     </div>
 
                     <div class="col-12 mb-3">
+                        <label for="direccion" class="form-label">Direcion</label>
+                        <input type="text" id="direccion" class="form-control text-uppercase" name="direccion">
+                        <div class="invalid-feedback">El campo no debe estar vacío.</div>
+                    </div>
+
+                    <div class="col-6 mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="text" id="telefono" class="form-control text-uppercase" name="telefono">
+                        <div class="invalid-feedback">El campo no debe estar vacío.</div>
+                    </div>
+
+                    <div class="col-6 mb-3">
                         <label for="establecimiento" class="form-label">Establecimiento</label>
                         <select name="establecimiento" id="establecimiento" class="form-control">
                             <option value="1">Oficina Principal</option>
@@ -46,14 +58,28 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-12 mb-3">
+                    <div class="col-6 mb-3">
                         <label for="descripcion" class="form-label">Descripci&oacute;n</label>
                         <input type="hidden" name="id">
                         <input type="text" id="descripcion" class="form-control text-uppercase" name="descripcion">
                         <div class="invalid-feedback">El campo no debe estar vacío.</div>
                     </div>
-
+                     
                     <div class="col-12 mb-3">
+                        <label for="direccion" class="form-label">Direcion</label>
+                        <input type="hidden" name="id">
+                        <input type="text" id="direccion" class="form-control text-uppercase" name="direccion">
+                        <div class="invalid-feedback">El campo no debe estar vacío.</div>
+                    </div>
+
+                    <div class="col-6 mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="hidden" name="id">
+                        <input type="text" id="telefono" class="form-control text-uppercase" name="telefono">
+                        <div class="invalid-feedback">El campo no debe estar vacío.</div>
+                    </div>
+
+                    <div class="col-6 mb-3">
                         <label for="establecimiento" class="form-label">Establecimiento</label>
                         <select name="establecimiento" id="establecimiento" class="form-control">
                             <option value="1">Oficina Principal</option>

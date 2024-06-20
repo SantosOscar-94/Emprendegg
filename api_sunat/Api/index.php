@@ -14,7 +14,7 @@ function FacturacionUBL($Json_In)
 {
     $Json_Fac   = json_decode("[" . $Json_In . "]", JSON_UNESCAPED_UNICODE);
     $ruc        = '10753330459';
-    $send_sunat = 'Off';
+    $send_sunat = 'On';
 
     foreach ($Json_Fac as $cpe) 
     {

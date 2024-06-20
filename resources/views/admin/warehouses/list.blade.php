@@ -15,6 +15,8 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Descripci&oacute;n</th>
+                                    <th>Direccion</th>
+                                    <th>Teléfono</th>
                                     <th width="10%">Acciones</th>
                                 </tr>
                             </thead>

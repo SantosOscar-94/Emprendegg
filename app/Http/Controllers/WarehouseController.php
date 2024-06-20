@@ -51,8 +51,13 @@ class WarehouseController extends Controller
         }
 
         $descripcion            = trim($request->input('descripcion'));
+        $direccion           = trim($request->input('direccion'));
+        $telofono           = trim($request->input('telefono'));
         Warehouse::insert([
-            'descripcion'           => mb_strtoupper($descripcion)
+            'descripcion'           => mb_strtoupper($descripcion),
+            'direccion'           => mb_strtoupper($direccion),
+            'telefono'           => mb_strtoupper($telofono)
+            
         ]);
 
         echo json_encode([
@@ -93,8 +98,12 @@ class WarehouseController extends Controller
 
         $id                 = $request->input('id');
         $descripcion        = trim($request->input('descripcion'));
+        $direccion           = trim($request->input('direccion'));
+        $telofono           = trim($request->input('telefono'));
         Warehouse::where('id', $id)->update([
-            'descripcion'  => mb_strtoupper($descripcion)
+            'descripcion'           => mb_strtoupper($descripcion),
+            'direccion'           => mb_strtoupper($direccion),
+            'telefono'           => mb_strtoupper($telofono)
         ]);
 
         echo json_encode([
