@@ -6,6 +6,7 @@ use App\Exports\DownloadProduct;
 use App\Imports\ProductImport;
 use App\Models\Business;
 use App\Models\IgvTypeAffection;
+use App\Models\Kardex;
 use App\Models\Product;
 use App\Models\StockProduct;
 use App\Models\Unit;
@@ -107,7 +108,7 @@ class ProductController extends Controller
         else
             $igv            = 0;
 
-        Product::insert([
+        Product::create([
             'codigo_sunat'              => '00000000',
             'codigo_interno'            => $codigo_interno,
             'codigo_barras'             => $codigo_barras,
@@ -128,10 +129,25 @@ class ProductController extends Controller
         $idproducto             = Product::latest('id')->first()['id'];
 
         foreach ($idstores as $i => $item) {
-            StockProduct::insert([
+            StockProduct::create([
                 'idproducto'    => $idproducto,
                 'idalmacen'     => $item,
-                'cantidad'      => $cantidad[$i]
+                'cantidad'      => $cantidad[$i],
+                //'ingreso'      => $cantidad[$i]
+            ]);
+
+            Kardex::create([
+                'documentTypeId'    => 206,
+                'userId'            => auth()->user()->id,
+                'warehouseId'       => $item,
+                'document'     => $codigo_interno, //actualizar a código del sunat
+                'product'      => mb_strtoupper($descripcion),
+                'cant1'      => $cantidad[$i],
+                'price1'      => $precio_compra,
+                'total1'      => ($precio_compra * $cantidad[$i]),
+                'cant3'      => $cantidad[$i],
+                'price3'      => $precio_compra,
+                'total3'      => ($precio_compra * $cantidad[$i])
             ]);
         }
 
@@ -229,10 +245,23 @@ class ProductController extends Controller
 
         // Update stock
         foreach ($almacenes as $i => $item) {
+            $stock = StockProduct::where('idproducto', $id)->where('idalmacen', $item)->first();
             StockProduct::where('idproducto', $id)->where('idalmacen', $item)->update([
                 'idproducto'    => $id,
                 'idalmacen'     => $item,
                 'cantidad'      => $cantidad[$i]
+            ]);
+
+            Kardex::create([
+                'documentTypeId'    => 206,
+                'document'     => $codigo_interno, //actualizar a código del sunat
+                'product'      => mb_strtoupper($descripcion),
+                'cant1'      => $cantidad[$i],
+                'price1'      => $precio_compra,
+                'total1'      => ($precio_compra * $cantidad[$i]),
+                'cant3'      => $cantidad[$i],
+                'price3'      => $precio_compra,
+                'total3'      => ($precio_compra * $cantidad[$i])
             ]);
         }
 

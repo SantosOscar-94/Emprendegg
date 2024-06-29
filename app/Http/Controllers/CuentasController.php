@@ -48,7 +48,7 @@ class CuentasController extends Controller
         $num_cuenta3         = trim($request->input('num_cuenta3'));
         $cci3               = trim($request->input('cci3'));
 
-        Cuentas::insert([
+        Cuentas::create([
             
 
             'nombre_ban'         => mb_strtoupper($nombre_ban),

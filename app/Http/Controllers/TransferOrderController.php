@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\DetailTransferOrder;
+use App\Models\Kardex;
 use App\Models\Product;
 use App\Models\StockProduct;
 use App\Models\TransferOrder;
@@ -495,7 +496,7 @@ class TransferOrderController extends Controller
             return;
         }
 
-        TransferOrder::insert([
+        TransferOrder::create([
             'serie'                 => $serie,
             'correlativo'           => $correlativo,
             'fecha_emision'         => $fecha_emision,
@@ -508,12 +509,47 @@ class TransferOrderController extends Controller
             'estado'                => 0
         ]);
         $idtransfer                  = TransferOrder::latest('id')->first()['id'];
+
+        
+
         foreach($cart["products"] as $product)
         {
-            DetailTransferOrder::insert([
+            DetailTransferOrder::create([
                 'idorden_traslado'  => $idtransfer,
                 'idproducto'        => $product["id"],
                 'cantidad'          => $product["cantidad"]
+            ]);
+
+            $stock = StockProduct::where('idproducto', $product["id"])->where('idalmacen', $almacen_despacho)->first();
+
+            Kardex::create([
+                'documentTypeId'    => 306,
+                'userId'            => auth()->user()->id,
+                'warehouseId'       => $almacen_despacho,
+                'document'          => $product['codigo_interno'] ?? $product['descripcion'], //actualizar a código del sunat
+                'product'           => mb_strtoupper($product['descripcion']),
+                'cant2'             => $product["cantidad"] * (-1),
+                'price2'            => $product["precio_compra"],
+                'total2'            => ($product['precio_compra'] * $product['cantidad'] * (-1)),
+                'cant3'             => $stock->cantidad * (-1),
+                'price3'            => $product["precio_compra"],
+                'total3'            => ($product['precio_compra'] * $stock->cantidad * (-1))
+            ]);
+
+            $stock = StockProduct::where('idproducto', $product["id"])->where('idalmacen', $almacen_receptor)->first();
+
+            Kardex::create([
+                'documentTypeId'    => 306,
+                'userId'            => auth()->user()->id,
+                'warehouseId'       => $almacen_receptor,
+                'document'          => $product['codigo_interno'] ?? $product['descripcion'], //actualizar a código del sunat
+                'product'           => mb_strtoupper($product['descripcion']),
+                'cant1'             => $product["cantidad"],
+                'price1'            => $product["precio_compra"],
+                'total1'            => ($product['precio_compra'] * $product['cantidad']),
+                'cant3'             => $stock->cantidad,
+                'price3'            => $product["precio_compra"],
+                'total3'            => ($product['precio_compra'] * $stock->cantidad)
             ]);
         }
         $this->destroy_cart();

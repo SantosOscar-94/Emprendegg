@@ -102,7 +102,7 @@ class ProviderController extends Controller
 
             else
             {
-                Provider::insert([
+                Provider::create([
                     'iddoc'         => $tipo_documento,
                     'dni_ruc'       => $dni_ruc,
                     'nombres'       => mb_strtoupper($razon_social),

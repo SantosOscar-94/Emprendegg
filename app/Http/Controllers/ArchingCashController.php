@@ -132,7 +132,7 @@ class ArchingCashController extends Controller
             return;
         }
 
-        ArchingCash::insert([
+        ArchingCash::create([
             'idcaja'        => $idcaja,
             'idusuario'     => $idusuario,
             'fecha_inicio'  => $fecha_inicio,
@@ -275,9 +275,11 @@ class ArchingCashController extends Controller
         $billings           = array_merge(json_decode($b_f, true), json_decode($n_v, true));
         $cantidad_ventas    = 0; //count($billings);
         $monto_ventas       = 0;
+        $monto_ventas2      = 0;
         $idusuario          = $cash->idusuario;
         $idcaja             = $cash->idcaja;
         $idarqueocaja       = $cash->id;
+        $billing_filter     = $billings;
 
         foreach($billings as $billing)
         {
@@ -362,7 +364,8 @@ class ArchingCashController extends Controller
                                 <p class="mb-0"></p>
                                 <h6 class="mb-0"><span style="font-size: 13px;">'. $sale->tipo_pago .': </span><span>'. $sale->cantidad .'</span></h6>
                             </div>';
-                //$monto_ventas += number_format($sale->monto, 2, ".", "");
+                //$monto_ventas += number_format($sale->monto, 2, ".", ",");
+                $monto_ventas2 += number_format($cantidadDolar, 2, ".", ",");
                 $cantidad_ventas += $sale->cantidad;
             }
 
@@ -386,6 +389,7 @@ class ArchingCashController extends Controller
             'html_sales'        => $html_sales,
             'sales_empty'       => $sales_empty,
             'monto_ventas'      => number_format($monto_ventas, 2, ".", ","),
+            'monto_ventas2'     => $monto_ventas2,
             'total'             => $total,
             'html_quantity'     => $html_quantity,
             'download_button'   => $html_download

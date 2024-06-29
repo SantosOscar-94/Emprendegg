@@ -49,7 +49,7 @@
                     }
                     html_tbody += `<tr class="${tachado}">
                             <td class="text-center">${moment(billing.fecha_emision).format('DD-MM-yyyy')}</td>
-                            <td class="text-center">${billing.idusuario}</td>
+                            <td class="text-center">${billing.usuario}</td>
                             
                             <td class="text-center">${billing.serie}-${billing.correlativo}</td>
                             <td>`;
@@ -72,15 +72,15 @@
                             </tr>`;
                 });
                 html_tbody += `<tr>
-                                <th colspan="9" class="text-end">Total S/ </th>
+                                <th colspan="10" class="text-end">Total S/ </th>
                                 <td class="text-center">${parseFloat(total).toFixed(2)}</td>
                             </tr>
                             <tr>
-                                <th colspan="9" class="text-end text-danger">Anulado S/ </th>
+                                <th colspan="10" class="text-end text-danger">Anulado S/ </th>
                                 <td class="text-center text-danger">${parseFloat(total_anulado).toFixed(2)}</td>
                             </tr>
                             <tr>
-                                <th colspan="9" class="text-end">Total Neto S/ </th>
+                                <th colspan="10" class="text-end">Total Neto S/ </th>
                                 <td class="text-center">${parseFloat(total - total_anulado).toFixed(2)}</td>
                             </tr>`;
                 $('#wrapper_tbody').html(html_tbody);

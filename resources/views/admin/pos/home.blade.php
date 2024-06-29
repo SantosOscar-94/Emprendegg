@@ -245,7 +245,7 @@
     @include('admin.arching_cashes.js-store')
 @endsection
 
-<script>
+<!-- <script>
 
     document.addEventListener('DOMContentLoaded', function() {
         window.usd = false;
@@ -729,4 +729,4 @@
 
     
     
-</script>
+</script> -->

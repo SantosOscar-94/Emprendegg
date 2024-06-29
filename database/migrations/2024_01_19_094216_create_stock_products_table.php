@@ -18,6 +18,7 @@ class CreateStockProductsTable extends Migration
             $table->integer('idproducto');
             $table->integer('idalmacen');
             $table->integer('cantidad');
+            //$table->integer('ingreso')->nullable();
             $table->timestamps();
         });
     }

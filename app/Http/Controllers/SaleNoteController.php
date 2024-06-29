@@ -351,7 +351,7 @@ class SaleNoteController extends Controller
             return;
         }
 
-        SaleNote::insert([
+        SaleNote::create([
             'idtipo_comprobante'    => $idtipo_comprobante,
             'serie'                 => $serie,
             'correlativo'           => $correlativo,
@@ -377,7 +377,7 @@ class SaleNoteController extends Controller
         ]);
         
         $idnotaventa                = SaleNote::latest('id')->first()['id'];
-        DetailPayment::insert([
+        DetailPayment::create([
             'idtipo_comprobante'    => $idtipo_comprobante,
             'idfactura'             => $idnotaventa,
             'idpago'                => $modo_pago,
@@ -386,7 +386,7 @@ class SaleNoteController extends Controller
         ]);
         foreach ($cart['products'] as $product) 
         {
-            DetailSaleNote::insert([
+            DetailSaleNote::create([
                 'idnotaventa'           => $idnotaventa,
                 'idproducto'            => $product['id'],
                 'cantidad'              => $product['cantidad'],
@@ -626,7 +626,7 @@ class SaleNoteController extends Controller
         ->size(140)
         ->generate($qr, 'files/billings/qr/' . $name_qr . '.png');
 
-        Billing::insert([
+        Billing::create([
             'idtipo_comprobante'    => $idtipo_comprobante,
             'serie'                 => $serie,
             'correlativo'           => $correlativo,
@@ -658,7 +658,7 @@ class SaleNoteController extends Controller
             'qr'                    => $name_qr . '.png'
         ]);
         $idfactura                  = Billing::latest('id')->first()['id'];
-        DetailPayment::insert([
+        DetailPayment::create([
             'idtipo_comprobante'    => $idtipo_comprobante,
             'idfactura'             => $idfactura,
             'idpago'                => $quote->modo_pago,
@@ -667,7 +667,7 @@ class SaleNoteController extends Controller
         ]);
 
         foreach ($detalle as $product) {
-            DetailBilling::insert([
+            DetailBilling::create([
                 'idfacturacion'         => $idfactura,
                 'idproducto'            => $product['idproducto'],
                 'cantidad'              => $product['cantidad'],

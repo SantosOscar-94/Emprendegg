@@ -15,6 +15,7 @@ use App\Http\Controllers\CuentasController;
 use App\Http\Controllers\ExtraController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InventoryReportController;
+use App\Http\Controllers\KardexController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
@@ -223,6 +224,10 @@ Route::post('/billings/user-billings'   , [BillingController::class, 'userBills'
 Route::get('/inventories-items'         , [InventoryReportController::class, 'products'])->name('admin.inventory_products')->middleware('auth');
 Route::post('/search-inventory-products', [InventoryReportController::class, 'search_products'])->name('admin.search_inventory_products');
 Route::post('/export-inventory-products', [InventoryReportController::class, 'export_products'])->name('admin.export_inventory_products');
+##kardex
+Route::get('/kardex'                    , [KardexController::class, 'index'])->name('admin.kardex.index');
+Route::post('/kardex/filter'            , [KardexController::class, 'filter'])->name('admin.kardex.filter');
+Route::post('/kardex/download'          , [KardexController::class, 'download'])->name('admin.kardex.download');
 // Customers
 Route::get('/contacts-customers'        , [ContactReportController::class, 'customers'])->name('admin.contact_customers')->middleware('auth');
 Route::post('/search-inventory-customers'   , [ContactReportController::class, 'search_customers'])->name('admin.search_contacts_customers');

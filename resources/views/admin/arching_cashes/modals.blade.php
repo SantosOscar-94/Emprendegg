@@ -151,6 +151,8 @@
                             <p class="mb-1">Total de Ventas</p>
                             <div class="d-flex align-items-center">
                                 <h1 class="text-heading display-6 mb-1 sales_amount"></h1>
+                                <h1 class="text-heading display-6 mb-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+                                <h1 class="text-heading display-6 mb-1 sales_amount2"></h1>
                             </div>
                         </div>
                         <div>
@@ -169,7 +171,7 @@
                             </div>
                             <div id="wrapper_sales"></div>
                             <div class="d-flex justify-content-between align-items-center mt-3">
-                                <p class="mb-0">Cantidad de ventas</p>
+                                <p class="mb-0">Cantidad de pagos</p>
                                 <h6 class="mb-0 quantity"></h6>
                             </div>
                             <div id="wrapper_quantity"></div>

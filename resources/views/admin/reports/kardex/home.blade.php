@@ -5,6 +5,11 @@
             overflow-x: hidden;
         }
     </style>
+    <style>
+    .table-responsive-sm {
+        overflow-x: auto; 
+    }
+</style>
 @endsection
 @section('content')
     <section class="basic-select2">
@@ -14,8 +19,8 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Filtros: </h5>
-                        <form id="form-sales-seller" method="POST" class="form form-vertical"
-                            action="{{ route('admin.export_sales_seller') }}" target="_blank">
+                        <form id="form-kardex" method="POST" class="form form-vertical"
+                            action="{{ route('admin.kardex.download') }}" target="_blank">
                             @csrf
                             <div class="row">
                                 <div class="col-12 col-md-2 mb-3">
@@ -30,32 +35,42 @@
                                         value="{{ date('Y-m-t') }}">
                                 </div>
 
-                                <div class="col-6 col-md-2 mb-3">
-                                    <label class="form-label" for="iduser">Vendedor</label>
-                                    <select class="select2-size-sm form-control" id="iduser" name="iduser">
-                                        <option value="0">TODOS</option>
-                                        @foreach ($sellers as $seller)
-                                            <option value="{{ $seller->id }}">
-                                                {{ $seller->nombres }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                @php
+                                    $user = App\Models\User::with('roles')->where('id', auth()->user()['id'])->first();
+                                    $role = $user->roles->first();
+                                @endphp
 
-                                <div class="col-6 col-md-2 mb-3">
-                                    <label class="form-label" for="iduser">Tienda</label>
-                                    <select class="select2-size-sm form-control" id="warehouse" name="warehouse">
-                                        <option value="0">TODOS</option>
-                                        @foreach ($warehouses as $item)
-                                            <option value="{{ $item->id }}">
-                                                {{ $item->descripcion }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                @if ($role->name == "SUPERADMIN" || $role->name == "ADMIN")
+                                    <div class="col-12 col-md-3 mb-3">
+                                        <label class="form-label" for="user">Vendedor</label>
+                                        <select class="select2-size-sm form-control" id="user" name="user">
+                                            <option value="0">TODOS</option>
+                                            @foreach ($users as $user)
+                                                <option value="{{ $user->id }}">
+                                                    {{ $user->nombres }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                                <div class="col-12 col-md-3 mb-3">
-                                    <label class="form-label" for="document">Documento</label>
+                                    <div class="col-6 col-md-2 mb-3">
+                                        <label class="form-label" for="warehouse">Tienda</label>
+                                        <select class="select2-size-sm form-control" id="warehouse" name="warehouse">
+                                            <option value="0">TODOS</option>
+                                            @foreach ($warehouses as $warehouse)
+                                                <option value="{{ $warehouse->id }}">
+                                                    {{ $warehouse->descripcion }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                @endif
+                            
+                                <div class="col-6 col-md-3 mb-3">
+                                    <label class="form-label" for="document">typo de documento</label>
                                     <select class="select2-size-sm form-control" id="document" name="document">
                                         <option value="0">TODOS</option>
+                                        <option value="206">COMPRAS</option>
+                                        <option value="306">TRASLADOS</option>
                                         @foreach ($type_documents as $type_document)
                                             <option value="{{ $type_document->id }}">
                                                 {{ $type_document->descripcion }}</option>
@@ -106,23 +121,25 @@
                                     <table class="table table-sm mb-0 fs--1">
                                         <thead>
                                             <tr>
-                                                <th colspan="3" class="text-center">Documento</th>
-                                                <th colspan="3" class="text-center">Cliente</th>
-                                                <th colspan="5" class="text-center">Soles</th>
+                                                <th colspan="4" class="text-center">Información general</th>
+                                                <th colspan="1" class="text-center">Ingresos</th>
+                                                <th colspan="1" class="text-center">Salidas</th>
+                                                <th colspan="1" class="text-center">Saldo</th>
                                             </tr>
                                             <tr>
                                                 <th class="text-center">Fecha</th>
-                                                <th class="text-center">Vendedor</th> 
-                                                
+                                                <th class="text-center">Tipo documento</th> 
                                                 <th class="text-center">Documento</th>
-                                                <th class="text-center">Pago</th>
-                                                <th class="text-center">RUC / DNI</th>
-                                                <th class="text-center">Razón Social</th>
-                                                <th class="text-center">Exonerada</th>
-                                                <th class="text-center">Gravada</th>
-                                                <th class="text-center">Inafecta</th>
-                                                <th class="text-center">IGV</th>
-                                                <th class="text-center">Importe</th>
+                                                <th class="text-center">Producto</th>
+                                                <th class="text-center">Cantidad</th>
+                                                <!-- <th class="text-center">Costo unitario</th>
+                                                <th class="text-center">Costo total</th> -->
+                                                <th class="text-center">Cantidad</th>
+                                                <!-- <th class="text-center">Costo unitario</th>
+                                                <th class="text-center">Costo total</th> -->
+                                                <th class="text-center">Cantidad</th>
+                                                <!-- <th class="text-center">Costo unitario</th>
+                                                <th class="text-center">Costo total</th> -->
                                             </tr>
                                         </thead>
                                         <tbody id="wrapper_tbody"></tbody>
@@ -137,5 +154,5 @@
     </section>
 @endsection
 @section('scripts')
-    @include('admin.reports.sales.sellers.js-home')
+    @include('admin.reports.kardex.js-home')
 @endsection

@@ -342,6 +342,53 @@
         </div>
     </table>
 
+    <table class="description">
+        <thead class="thead_table">
+            <tr>
+                <th colspan="5" class="center">CUENTAS</th>
+            </tr>
+            <tr>
+                <th class="row-1">#</th>
+                <th class="row-1">BANCO</th>
+                <th class="row-1">MONEDA</th>
+                <th class="row-2"># CUENTA</th>
+                <th class="row-2">CCI</th>
+            </tr>
+            
+            
+        </thead>
+        <tbody>
+            <tr>
+                <td class="center">1</td>
+                <td class="center">{{ $cuentas->nombre_ban }}</td>
+                <td class="center">{{ $cuentas->moneda }}</td>
+                <td class="center">{{ $cuentas->num_cuenta }}</td>
+                <td class="center">{{ $cuentas->cci }}</td>
+            </tr>
+            <tr>
+                <td class="center">2</td>
+                <td class="center">{{ $cuentas->nombre_ban1 }}</td>
+                <td class="center">{{ $cuentas->moneda1 }}</td>
+                <td class="center">{{ $cuentas->num_cuenta1 }}</td>
+                <td class="center">{{ $cuentas->cci1 }}</td>
+            </tr>
+            <tr>
+                <td class="center">3</td>
+                <td class="center">{{ $cuentas->nombre_ban2 }}</td>
+                <td class="center">{{ $cuentas->moneda2 }}</td>
+                <td class="center">{{ $cuentas->num_cuenta2 }}</td>
+                <td class="center">{{ $cuentas->cci2 }}</td>
+            </tr>
+            <tr>
+                <td class="center">4</td>
+                <td class="center">{{ $cuentas->nombre_ban3 }}</td>
+                <td class="center">{{ $cuentas->moneda3 }}</td>
+                <td class="center">{{ $cuentas->num_cuenta3 }}</td>
+                <td class="center">{{ $cuentas->cci3 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
 </body>
 
 </html>

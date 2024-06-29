@@ -51,7 +51,7 @@ class CashController extends Controller
         }
 
         $descripcion        = trim($request->input('descripcion'));
-        Cash::insert([
+        Cash::create([
             'descripcion'   => mb_strtoupper($descripcion)
         ]);
 

@@ -107,7 +107,7 @@ class SerieController extends Controller
             return;
         }
 
-        Serie::insert([
+        Serie::create([
             'serie'                         => mb_strtoupper($serie),
             'correlativo'                   => str_pad($correlativo, STR_PAD_RIGHT),
             'idtipo_documento'              => $tipo_documento,

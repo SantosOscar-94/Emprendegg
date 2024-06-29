@@ -13,6 +13,7 @@ use App\Models\DetailPayment;
 use App\Models\DetailSaleNote;
 use App\Models\IdentityDocumentType;
 use App\Models\IgvTypeAffection;
+use App\Models\Kardex;
 use App\Models\PayMode;
 use App\Models\Product;
 use App\Models\SaleNote;
@@ -251,23 +252,56 @@ class PosController extends Controller
         $contador       = 0;
 
         if (!empty($cart['products'])) {
-            foreach ($cart['products'] as $i => $product) {
-                $contador   = $contador + 1;
-                $html_cart .= '<tr>
-                                <td class="text-center">' . $contador . '</td>
-                                <td class="text-left">' . $product["descripcion"] . '</td>
-                                <td class="text-right">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text btn-down" style="cursor: pointer;" data-id="' . $product["id"] . '" data-cantidad="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '"><i class="ti ti-minus me-sm-1"></i></span>
-                                        <input type="text" data-id="' . $product["id"] . '" class="quantity-counter text-center form-control" value="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '">
-                                        <span class="input-group-text btn-up" style="cursor: pointer;" data-id="' . $product["id"] . '" data-cantidad="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '"><i class="ti ti-plus me-sm-1"></i></span>
-                                    </div>
-                                </td>
-                                <td class="text-center"><input type="text" class="form-control form-control-sm text-center input-update" value="' . number_format($product["precio_venta"], 2, ".", "") . '" data-cantidad="' . $product["cantidad"] . '" data-id="' . $product["id"] . '" data-precio="' . $product["precio_venta"] . '" name="precio"></td>
-                                <td class="text-center"><span class="total" data-total="' . number_format(($product["precio_venta"] * $product["cantidad"]), 2, ".", "") . '">' . number_format(($product["precio_venta"] * $product["cantidad"]), 2, ".", "") . '</span></td>
-                                <td class="text-center"><span data-id="' . $product["id"] . '" class="text-danger btn-delete-product-cart" style="cursor: pointer;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x align-middle mr-25"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span></td>
-                            </tr>';
+            if ($request['cambio'] == 1) {
+                foreach ($cart['products'] as $i => $product) {
+                    $contador   = $contador + 1;
+                    $html_cart .= '<tr>
+                                    <td class="text-center">' . $contador . '</td>
+                                    <td class="text-left">' . $product["descripcion"] . '</td>
+                                    <td class="text-right">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text btn-down" style="cursor: pointer;" data-id="' . $product["id"] . '" data-cantidad="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '"><i class="ti ti-minus me-sm-1"></i></span>
+                                            <input type="text" data-id="' . $product["id"] . '" class="quantity-counter text-center form-control" value="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '">
+                                            <span class="input-group-text btn-up" style="cursor: pointer;" data-id="' . $product["id"] . '" data-cantidad="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '"><i class="ti ti-plus me-sm-1"></i></span>
+                                        </div>
+                                    </td>';
+                    $role = User::with('roles')->where('id', auth()->user()->id)->first()->roles[0]->name;
+                    if ($role != "SUPERADMIN" && $role != "ADMIN") {
+                        $html_cart .='<td class="text-center"><input type="text" class="form-control form-control-sm text-center input-update" disabled value="' . number_format($product["precio_venta"], 2, ".", "") . '" data-cantidad="' . $product["cantidad"] . '" data-id="' . $product["id"] . '" data-precio="' . $product["precio_venta"] . '" name="precio"></td>';
+                    }else{
+                        $html_cart .='<td class="text-center"><input type="text" class="form-control form-control-sm text-center input-update" value="' . number_format($product["precio_venta"], 2, ".", "") . '" data-cantidad="' . $product["cantidad"] . '" data-id="' . $product["id"] . '" data-precio="' . $product["precio_venta"] . '" name="precio"></td>';
+                    }
+                                    
+                    $html_cart .=   '<td class="text-center"><span class="total" data-total="' . number_format(($product["precio_venta"] * $product["cantidad"]), 2, ".", "") . '">' . number_format(($product["precio_venta"] * $product["cantidad"]), 2, ".", "") . '</span></td>
+                                    <td class="text-center"><span data-id="' . $product["id"] . '" class="text-danger btn-delete-product-cart" style="cursor: pointer;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x align-middle mr-25"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span></td>
+                                </tr>';
+                }
+            }else{
+                foreach ($cart['products'] as $i => $product) {
+                    $contador   = $contador + 1;
+                    $html_cart .= '<tr>
+                                    <td class="text-center">' . $contador . '</td>
+                                    <td class="text-left">' . $product["descripcion"] . '</td>
+                                    <td class="text-right">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text btn-down" style="cursor: pointer;" data-id="' . $product["id"] . '" data-cantidad="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '"><i class="ti ti-minus me-sm-1"></i></span>
+                                            <input type="text" data-id="' . $product["id"] . '" class="quantity-counter text-center form-control" value="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '">
+                                            <span class="input-group-text btn-up" style="cursor: pointer;" data-id="' . $product["id"] . '" data-cantidad="' . $product["cantidad"] . '" data-precio="' . $product["precio_venta"] . '"><i class="ti ti-plus me-sm-1"></i></span>
+                                        </div>
+                                    </td>';
+                    $role = User::with('roles')->where('id', auth()->user()->id)->first()->roles[0]->name;
+                    if ($role != "SUPERADMIN" && $role != "ADMIN") {
+                        $html_cart .='<td class="text-center"><input type="text" class="form-control form-control-sm text-center input-update" disabled value="' . number_format(($product["precio_venta"] / $request['cambio']), 2, ".", "") . '" data-cantidad="' . $product["cantidad"] . '" data-id="' . $product["id"] . '" data-precio="' . $product["precio_venta"] . '" name="precio"></td>';
+                    }else{
+                        $html_cart .='<td class="text-center"><input type="text" class="form-control form-control-sm text-center input-update" value="' . number_format(($product["precio_venta"] / $request['cambio']), 2, ".", "") . '" data-cantidad="' . $product["cantidad"] . '" data-id="' . $product["id"] . '" data-precio="' . $product["precio_venta"] . '" name="precio"></td>';
+                    }
+                                    
+                    $html_cart .=   '<td class="text-center"><span class="total" data-total="' . number_format($product["precio_venta"] * $product["cantidad"], 2, ".", "") . '">' . number_format((($product["precio_venta"] * $product["cantidad"]) / $request['cambio']), 2, ".", "") . '</span></td>
+                                    <td class="text-center"><span data-id="' . $product["id"] . '" class="text-danger btn-delete-product-cart" style="cursor: pointer;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x align-middle mr-25"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span></td>
+                                </tr>';
+                }
             }
+            
         } else {
             $html_cart .= '<tr>
                             <td colspan="6" class="text-center text-muted">Agregue productos al carrito</td>
@@ -276,16 +310,16 @@ class PosController extends Controller
 
         $html_totales   .= '<div class="d-flex justify-content-between align-items-center mt-3">
                                     <p class="mb-0">OP. Gravadas</p>
-                                    <h6 class="mb-0"><span name="moneda">S/ </span><span class="gravadas" data-valor="'.number_format(($cart['exonerada'] + $cart['gravada'] + $cart['inafecta']), 2, ".", "").'">' . number_format(($cart['exonerada'] + $cart['gravada'] + $cart['inafecta']), 2, ".", "") . '<span></h6>
+                                    <h6 class="mb-0"><span name="moneda">S/ </span><span class="gravadas" data-valor="'.number_format((($cart['exonerada'] + $cart['gravada'] + $cart['inafecta'])), 2, ".", "").'">' . number_format(($cart['exonerada'] + $cart['gravada'] + $cart['inafecta'] / $request['cambio']), 2, ".", "") . '<span></h6>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <p class="mb-0">IGV</p>
-                                    <h6 class="mb-0"><span name="moneda">S/ </span><span class="igv" data-valor="'.number_format($cart['igv'], 2, ".", "").'">' . number_format($cart['igv'], 2, ".", "") . '<span></h6>
+                                    <h6 class="mb-0"><span name="moneda">S/ </span><span class="igv" data-valor="'.number_format($cart['igv'], 2, ".", "").'">' . number_format(($cart['igv'] / $request['cambio']), 2, ".", "") . '<span></h6>
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-between align-items-center mt-3 pb-1">
                                     <p class="mb-0">Total</p>
-                                    <h6 class="mb-0"><span name="moneda">S/ </span><span class="total2" id="total2" data-valor="'.number_format($cart['total'], 2, ".", "").'">' . number_format($cart['total'], 2, ".", "") . '<span></h6>
+                                    <h6 class="mb-0"><span name="moneda">S/ </span><span class="total2" id="total2" data-valor="'.number_format($cart['total'], 2, ".", "").'">' . number_format(($cart['total'] / $request['cambio']), 2, ".", "") . '<span></h6>
                                 </div>';
 
         echo json_encode([
@@ -568,7 +602,7 @@ class PosController extends Controller
 
         if ($iddocumento_tipo == "7") // NV
         {
-            SaleNote::insert([
+            SaleNote::create([
                 'idtipo_comprobante'    => $iddocumento_tipo,
                 'serie'                 => $serie,
                 'correlativo'           => $correlativo,
@@ -597,7 +631,7 @@ class PosController extends Controller
             $idfactura                  = SaleNote::latest('id')->first()['id'];
             // Detail
             foreach ($cart['products'] as $product) {
-                DetailSaleNote::insert([
+                DetailSaleNote::create([
                     'idnotaventa'           => $idfactura,
                     'idproducto'            => $product['id'],
                     'cantidad'              => $product['cantidad'],
@@ -615,12 +649,29 @@ class PosController extends Controller
                                 ->update([
                                     'cantidad'  => $product["stock"] - $product["cantidad"]
                                 ]);
+
+                    $stock = StockProduct::where('idproducto', $product["id"])->where('idalmacen', $idalmacen)->first();
+                    $oProduct = Product::findOrFail($product["id"]);
+
+                    Kardex::create([
+                        'documentTypeId'    => $product['idtipo_comprobante'],
+                        'userId'            => auth()->user()->id,
+                        'warehouseId'       => auth()->user()->idalmacen,
+                        'document'     => $product['serie']."-".$product['correlativo'], 
+                        'product'      => mb_strtoupper($product['descripcion']),
+                        'cant2'      => $product["cantidad"],
+                        'price2'      => ($product['precio_venta'] * -1),
+                        'total2'      => ($product['precio_venta'] * $product['cantidad']),
+                        'cant3'      => $stock->cantidad,
+                        'price3'      => $oProduct->precio_venta,
+                        'total3'      => (($oProduct->precio_venta * $stock->cantidad) *-1)
+                    ]);
                 }
             }
 
             // Insert pay mode
             if ($quantity_paying != "0.00") {
-                DetailPayment::insert([
+                DetailPayment::create([
                     'idtipo_comprobante'    => $iddocumento_tipo,
                     'idfactura'             => $idfactura,
                     'idpago'                => $pay_mode,
@@ -631,7 +682,7 @@ class PosController extends Controller
             }
 
             if ($quantity_paying_2 != "0.00") {
-                DetailPayment::insert([
+                DetailPayment::create([
                     'idtipo_comprobante'    => $iddocumento_tipo,
                     'idfactura'             => $idfactura,
                     'idpago'                => $pay_mode_2,
@@ -644,7 +695,7 @@ class PosController extends Controller
             }
 
             if ($quantity_paying_3 != "0.00") {
-                DetailPayment::insert([
+                DetailPayment::create([
                     'idtipo_comprobante'    => $iddocumento_tipo,
                     'idfactura'             => $idfactura,
                     'idpago'                => $pay_mode_3,
@@ -684,7 +735,7 @@ class PosController extends Controller
                 ->size(140)
                 ->generate($qr, 'files/billings/qr/' . $name_qr . '.png');
 
-            Billing::insert([
+            Billing::create([
                 'idtipo_comprobante'    => $iddocumento_tipo,
                 'serie'                 => $serie,
                 'correlativo'           => $correlativo,
@@ -717,7 +768,7 @@ class PosController extends Controller
             $idfactura                  = Billing::latest('id')->first()['id'];
 
             foreach ($cart['products'] as $product) {
-                DetailBilling::insert([
+                DetailBilling::create([
                     'idfacturacion'         => $idfactura,
                     'idproducto'            => $product['id'],
                     'cantidad'              => $product['cantidad'],
@@ -735,12 +786,29 @@ class PosController extends Controller
                                 ->update([
                                     'cantidad'  => $product["stock"] - $product["cantidad"]
                                 ]);
+
+                    $stock = StockProduct::where('idproducto', $product["id"])->where('idalmacen', $idalmacen)->first();
+                    $oProduct = Product::findOrFail($product["id"]);
+
+                    Kardex::create([
+                        'documentTypeId'    => $iddocumento_tipo,
+                        'userId'            => auth()->user()->id,
+                        'warehouseId'       => auth()->user()->idalmacen,
+                        'document'     => $serie."-".$correlativo, 
+                        'product'      => mb_strtoupper($product['descripcion']),
+                        'cant2'      =>  ($product["cantidad"] * (-1)),
+                        'price2'      => ($product['precio_venta'] * (-1)),
+                        'total2'      => (($product['precio_venta'] * $product['cantidad']) * (-1)),
+                        'cant3'      => ($stock->cantidad * (-1)),
+                        'price3'      => $oProduct->precio_venta,
+                        'total3'      => (($oProduct->precio_venta * $stock->cantidad) * (-1))
+                    ]);
                 }
             }
 
             // Insert pay mode
             if ($quantity_paying != "0.00") {
-                DetailPayment::insert([
+                DetailPayment::create([
                     'idtipo_comprobante'    => $iddocumento_tipo,
                     'idfactura'             => $idfactura,
                     'idpago'                => $pay_mode,
@@ -751,7 +819,7 @@ class PosController extends Controller
             }
 
             if ($quantity_paying_2 != "0.00") {
-                DetailPayment::insert([
+                DetailPayment::create([
                     'idtipo_comprobante'    => $iddocumento_tipo,
                     'idfactura'             => $idfactura,
                     'idpago'                => $pay_mode_2,
@@ -764,7 +832,7 @@ class PosController extends Controller
             }
 
             if ($quantity_paying_3 != "0.00") {
-                DetailPayment::insert([
+                DetailPayment::create([
                     'idtipo_comprobante'    => $iddocumento_tipo,
                     'idfactura'             => $idfactura,
                     'idpago'                => $pay_mode_3,
@@ -943,6 +1011,25 @@ class PosController extends Controller
             'codigo_igv'        => $product->codigo_igv,
             'igv'               => $product->igv,
             'precio_compra'     => $product->precio_compra,
+            'precio_venta'      => $product->precio_venta,
+            'impuesto'          => $product->impuesto,
+            'stock'             => ($opcion == 1) ? $product->stock : null,
+            'opcion'            => $opcion,
+            'cantidad'          => $cantidad,
+            'idalmacen'         => ($opcion == 1) ? $product->idalmacen : null,
+        ];
+
+        $new_product2    =
+        [
+            'id'                => $product->id,
+            'codigo_sunat'      => $product->codigo_sunat,
+            'descripcion'       => $product->descripcion,
+            'idunidad'          => $product->idunidad,
+            'unidad'            => $product->unidad,
+            'idcodigo_igv'      => $product->idcodigo_igv,
+            'codigo_igv'        => $product->codigo_igv,
+            'igv'               => $product->igv,
+            'precio_compra'     => $product->precio_compra,
             'precio_venta'      => $precio,
             'impuesto'          => $product->impuesto,
             'stock'             => ($opcion == 1) ? $product->stock : null,
@@ -952,7 +1039,7 @@ class PosController extends Controller
         ];
 
         if (empty(session()->get('pos')['products'])) {
-            session()->push('quote.products', $new_product);
+            session()->push('quote.products', $new_product2);
             session()->push('pos.products', $new_product);
             return true;
         }

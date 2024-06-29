@@ -226,7 +226,7 @@ class CreditNoteController extends Controller
         ->size(140)
         ->generate($qr, 'files/billings/qr/' . $name_qr . '.png');
 
-        Billing::insert([
+        Billing::create([
             'idtipo_comprobante'    => 6,
             'serie'                 => $serie,
             'correlativo'           => $correlativo,
@@ -276,7 +276,7 @@ class CreditNoteController extends Controller
         $idalmacen                  = Auth::user()['idalmacen'];
         foreach($detalle as $product)
         {
-            DetailBilling::insert([
+            DetailBilling::create([
                 'idfacturacion'         => $idfactura,
                 'idproducto'            => $product['idproducto'],
                 'cantidad'              => $product['cantidad'],
@@ -306,7 +306,7 @@ class CreditNoteController extends Controller
         // Insert Payment
         foreach($pagos_anular as $pago_anular)
         {
-            DetailPayment::insert([
+            DetailPayment::create([
                 'idtipo_comprobante'    => 6,
                 'idfactura'             => $idfactura,
                 'idpago'                => $pago_anular["idpago"],

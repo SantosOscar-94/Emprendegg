@@ -8,8 +8,10 @@ use App\Exports\SaleReportSeller;
 use App\Models\Billing;
 use App\Models\Business;
 use App\Models\Client;
+use App\Models\SaleNote;
 use App\Models\TypeDocument;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -445,7 +447,9 @@ class SaleReportController extends Controller
     public function sales_seller()
     {
         $data["sellers"]        = User::get();
+        $data["warehouses"]        = Warehouse::get();
         $data["type_documents"] = TypeDocument::where('id', 1)->orWhere('id', 2)->orWhere('id', 7)->get();
+        //dd($data);
         return view('admin.reports.sales.sellers.home', $data);
     }
 
@@ -462,141 +466,47 @@ class SaleReportController extends Controller
 
         $fecha_inicial      = $request->input('fecha_inicial');
         $fecha_final        = $request->input('fecha_final');
-        $iduser             = $request->input('iduser');
+        $user             = $request->input('iduser');
+        $warehouse             = $request->input('warehouse');
         $data["pagos"]      = [];
         $data["total"]      = 0;
         $document           = $request->input('document');
 
-        switch ($document) {
-            case '0':
-                switch ($iduser) {
-                    case '0':
-                        $b_f                    = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idtipo_comprobante != 6 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
+        $b_f = Billing::select("billings.*", "billings.estado_cpe as estado_venta", "clients.dni_ruc as dni_ruc", 
+                                "clients.nombres as nombre_cliente", "users.nombres as usuario", "users.idalmacen")
+                        ->join("clients", "billings.idcliente", "clients.id")
+                        ->join("users", "billings.idusuario", "users.id")
+                        ->where("billings.idtipo_comprobante", "!=", 6)
+                        ->whereBetween('billings.created_at', [$fecha_inicial, $fecha_final])
+                        ->orderBy('billings.id', 'ASC')
+                        ->get();
 
-                        $n_v                    = DB::select("SELECT sale_notes.*, sale_notes.estado as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM sale_notes 
-                                                INNER JOIN clients ON sale_notes.idcliente = clients.id
-                                                WHERE fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
+        $n_v = SaleNote::select("sale_notes.*", "sale_notes.estado as estado_venta", "clients.dni_ruc as dni_ruc", 
+                                "clients.nombres as  nombre_cliente", "users.nombres as usuario", "users.idalmacen as idalmacen")
+                        ->join("clients", "sale_notes.idcliente", "clients.id")
+                        ->join("users", "sale_notes.idusuario", "users.id")
+                        ->whereBetween('sale_notes.created_at', [$fecha_inicial, $fecha_final])
+                        ->orderBy('sale_notes.id', 'ASC')
+                        ->get();
 
-                        $b_f                    = json_encode($b_f);
-                        $n_v                    = json_encode($n_v);
-                        $data["billings"]       = array_merge(json_decode($b_f, true), json_decode($n_v, true));
-                        break;
-
-                    default:
-                        $b_f                    = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idusuario = $iduser AND idtipo_comprobante != 6 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-
-                        $n_v                    = DB::select("SELECT sale_notes.*, sale_notes.estado as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM sale_notes 
-                                                INNER JOIN clients ON sale_notes.idcliente = clients.id
-                                                WHERE idusuario = $iduser
-                                                AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-
-                        $b_f                    = json_encode($b_f);
-                        $n_v                    = json_encode($n_v);
-                        $data["billings"]       = array_merge(json_decode($b_f, true), json_decode($n_v, true));
-                        break;
-                }
-                break;
-
-            case '1':
-                switch ($iduser) {
-                    case '0':
-                        $billings   = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta,
-                                                clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idtipo_comprobante = 1 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        break;
-
-                    default:
-                        $billings   = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta,
-                                                clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idusuario = $iduser AND idtipo_comprobante = 1 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        break;
-                }
-                break;
-
-            case '2':
-                switch ($iduser) {
-                    case '0':
-                        $billings           = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta,
-                                                clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idtipo_comprobante = 2 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        break;
-
-                    default:
-                        $billings   = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta,
-                                                clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idusuario = $iduser AND idtipo_comprobante = 2 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        break;
-                }
-                break;
-
-            case '7':
-                switch ($iduser) {
-                    case '0':
-                        $billings   = DB::select("SELECT sale_notes.*, sale_notes.estado as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                        clients.nombres as  nombre_cliente 
-                                        FROM sale_notes 
-                                        INNER JOIN clients ON sale_notes.idcliente = clients.id
-                                        WHERE fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                        ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        break;
-
-                    default:
-                        $billings   = DB::select("SELECT sale_notes.*, sale_notes.estado as estado_venta,
-                                            clients.dni_ruc as dni_ruc, 
-                                            clients.nombres as  nombre_cliente 
-                                            FROM sale_notes 
-                                            INNER JOIN clients ON sale_notes.idcliente = clients.id
-                                            WHERE idusuario = $iduser AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                            ORDER BY id ASC");
-
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        break;
-                }
-                break;
+        if (!empty($user)) {
+            $b_f = $b_f->where('idusuario', $user);
+            $n_v = $n_v->where('idusuario', $user);
         }
+
+        if (!empty($warehouse)) {
+            $b_f = $b_f->where('idalmacen', $warehouse);
+            $n_v = $n_v->where('idalmacen', $warehouse);
+        }
+
+        if (!empty($document)) {
+            $b_f = $b_f->where('idtipo_comprobante', $document);
+            $n_v = $n_v->where('idtipo_comprobante', $document);
+        }
+
+        $b_f                    = json_encode($b_f);
+        $n_v                    = json_encode($n_v);
+        $data["billings"]       = array_merge(json_decode($b_f, true), json_decode($n_v, true));
 
         foreach ($data["billings"] as $billing) {
             $data["total"]          += strval($billing["total"]);
@@ -620,41 +530,11 @@ class SaleReportController extends Controller
         ]);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     public function export_sales_seller(Request $request)
     {
         $fecha_inicial              = $request->input('fecha_inicial');
         $fecha_final                = $request->input('fecha_final');
-        $iduser                     = $request->input('iduser');
+        $user                       = $request->input('iduser');
         $data["pagos"]              = [];
         $data["total"]              = 0;
         $data["anulado"]            = 0;
@@ -664,145 +544,47 @@ class SaleReportController extends Controller
         $data['ruc']                = $data["business"]->ruc;
         $data['nombre_comercial']   = $data["business"]->nombre_comercial;
         $document                   = $request->input('document');
-        switch ($document) {
-            case '0':
-                switch ($iduser) {
-                    case '0':
-                        $b_f                    = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idtipo_comprobante != 6 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
+        
+        $b_f = Billing::select("billings.*", "billings.estado_cpe as estado_venta", "clients.dni_ruc as dni_ruc", 
+                                "clients.nombres as nombre_cliente", "users.nombres as usuario", "users.idalmacen")
+                        ->join("clients", "billings.idcliente", "clients.id")
+                        ->join("users", "billings.idusuario", "users.id")
+                        ->where("billings.idtipo_comprobante", "!=", 6)
+                        ->whereBetween('billings.created_at', [$fecha_inicial, $fecha_final])
+                        ->orderBy('billings.id', 'ASC')
+                        ->get();
 
-                        $n_v                    = DB::select("SELECT sale_notes.*, sale_notes.estado as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM sale_notes 
-                                                INNER JOIN clients ON sale_notes.idcliente = clients.id
-                                                WHERE fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
+        $n_v = SaleNote::select("sale_notes.*", "sale_notes.estado as estado_venta", "clients.dni_ruc as dni_ruc", 
+                                "clients.nombres as  nombre_cliente", "users.nombres as usuario", "users.idalmacen as idalmacen")
+                        ->join("clients", "sale_notes.idcliente", "clients.id")
+                        ->join("users", "sale_notes.idusuario", "users.id")
+                        ->whereBetween('sale_notes.created_at', [$fecha_inicial, $fecha_final])
+                        ->orderBy('sale_notes.id', 'ASC')
+                        ->get();
 
-                        $b_f                    = json_encode($b_f);
-                        $n_v                    = json_encode($n_v);
-                        $data["billings"]       = array_merge(json_decode($b_f, true), json_decode($n_v, true));
-                        $data["seller"]         = "TODOS";
-                        break;
+        $data["seller"]         = "TODOS";
 
-                    default:
-                        $b_f                    = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idusuario = $iduser AND idtipo_comprobante != 6 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
+        if (!empty($user)) {
+            $b_f = $b_f->where('idusuario', $user);
+            $n_v = $n_v->where('idusuario', $user);
 
-                        $n_v                    = DB::select("SELECT sale_notes.*, sale_notes.estado as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM sale_notes 
-                                                INNER JOIN clients ON sale_notes.idcliente = clients.id
-                                                WHERE idusuario = $iduser
-                                                AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-
-                        $b_f                    = json_encode($b_f);
-                        $n_v                    = json_encode($n_v);
-                        $data["billings"]       = array_merge(json_decode($b_f, true), json_decode($n_v, true));
-                        $data["seller"]         = mb_strtoupper(User::where('id', $iduser)->first()["nombres"]);
-                        break;
-                }
-                break;
-
-            case '1':
-                switch ($iduser) {
-                    case '0':
-                        $billings   = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta,
-                                                clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idtipo_comprobante = 1 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        $data["seller"]     = "TODOS";
-                        break;
-
-                    default:
-                        $billings   = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta,
-                                                clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idusuario = $iduser AND idtipo_comprobante = 1 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        $data["seller"]     = mb_strtoupper(User::where('id', $iduser)->first()["nombres"]);
-                        break;
-                }
-                break;
-
-            case '2':
-                switch ($iduser) {
-                    case '0':
-                        $billings           = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta,
-                                                clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idtipo_comprobante = 2 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        $data["seller"]     = "TODOS";
-                        break;
-
-                    default:
-                        $billings   = DB::select("SELECT billings.*, billings.estado_cpe as estado_venta,
-                                                clients.dni_ruc as dni_ruc, 
-                                                clients.nombres as  nombre_cliente 
-                                                FROM billings 
-                                                INNER JOIN clients ON billings.idcliente = clients.id
-                                                WHERE idusuario = $iduser AND idtipo_comprobante = 2 AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                                ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        $data["seller"]     = mb_strtoupper(User::where('id', $iduser)->first()["nombres"]);
-                        break;
-                }
-                break;
-
-            case '7':
-                switch ($iduser) {
-                    case '0':
-                        $billings   = DB::select("SELECT sale_notes.*, sale_notes.estado as estado_venta ,clients.dni_ruc as dni_ruc, 
-                                        clients.nombres as  nombre_cliente 
-                                        FROM sale_notes 
-                                        INNER JOIN clients ON sale_notes.idcliente = clients.id
-                                        WHERE fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                        ORDER BY id ASC");
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        $data["seller"]     = "TODOS";
-                        break;
-
-                    default:
-                        $billings   = DB::select("SELECT sale_notes.*, sale_notes.estado as estado_venta,
-                                            clients.dni_ruc as dni_ruc, 
-                                            clients.nombres as  nombre_cliente 
-                                            FROM sale_notes 
-                                            INNER JOIN clients ON sale_notes.idcliente = clients.id
-                                            WHERE idusuario = $iduser AND fecha_emision BETWEEN '$fecha_inicial' AND '$fecha_final'
-                                            ORDER BY id ASC");
-
-                        $data["billings"]   = json_encode($billings);
-                        $data["billings"]   = json_decode($data["billings"], true);
-                        $data["seller"]     = mb_strtoupper(User::where('id', $iduser)->first()["nombres"]);
-                        break;
-                }
-                break;
+            $data["seller"]         = mb_strtoupper(User::where('id', $user)->first()["nombres"]);
         }
-        //
+
+        if (!empty($warehouse)) {
+            $b_f = $b_f->where('idalmacen', $warehouse);
+            $n_v = $n_v->where('idalmacen', $warehouse);
+        }
+
+        if (!empty($document)) {
+            $b_f = $b_f->where('idtipo_comprobante', $document);
+            $n_v = $n_v->where('idtipo_comprobante', $document);
+        }
+
+        $b_f                    = json_encode($b_f);
+        $n_v                    = json_encode($n_v);
+        $data["billings"]       = array_merge(json_decode($b_f, true), json_decode($n_v, true));
+        
         foreach ($data["billings"] as $billing) {
             if ($billing["estado_venta"] == 2)
                 $data["anulado"]    += $billing["total"];
@@ -821,6 +603,7 @@ class SaleReportController extends Controller
                                     WHERE idcaja = $idcaja AND idtipo_comprobante = $idtipo_comprobante AND idfactura = $idfactura
                                     GROUP BY idpago, pay_modes.descripcion, idfactura, idtipo_comprobante");
         }
+
         $data["quantity"]           = count($data["billings"]);
         $data["fecha_inicial"]      = $fecha_inicial;
         $data["fecha_final"]        = $fecha_final;

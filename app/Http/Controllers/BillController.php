@@ -68,7 +68,7 @@ class BillController extends Controller
         $idcaja                     = Auth::user()['idcaja'];
         $idarqueocaja               = ArchingCash::where('idcaja', $idcaja)->where('idusuario', $idusuario)->where('estado', 1)->first()->id;
 
-        Bill::insert([
+        Bill::create([
             'fecha_emision'         => $fecha_emision,
             'idpurchase_description'=> $idpurchase_description,
             'cuenta'                => $cuenta,

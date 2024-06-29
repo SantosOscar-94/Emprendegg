@@ -166,7 +166,7 @@ class ClientController extends Controller
             }
             else
             {
-                Client::insert([
+                Client::create([
                     'iddoc'         => $tipo_documento,
                     'dni_ruc'       => $dni_ruc,
                     'nombres'       => mb_strtoupper($razon_social),

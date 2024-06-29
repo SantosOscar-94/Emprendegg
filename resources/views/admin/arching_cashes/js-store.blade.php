@@ -257,6 +257,7 @@
                 }
 
                 $('#modalSummary .sales_amount').html(`S/${r.monto_ventas}`);
+                $('#modalSummary .sales_amount2').html(`$${r.monto_ventas2}`);
                 //$('#modalSummary .quantity').html(r.html_quantity);
                 $('#modalSummary .total').html(`S/${r.total}`);
                 $('.download-resumen').html(r.download_button);

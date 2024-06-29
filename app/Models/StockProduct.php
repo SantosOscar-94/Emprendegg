@@ -14,6 +14,7 @@ class StockProduct extends Model
     [
         'idproducto',
         'idalmacen',
-        'cantidad'
+        'cantidad',
+        'ingreso'
     ];
 }

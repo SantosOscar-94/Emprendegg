@@ -254,7 +254,7 @@
               <ul class="menu-sub">
                 <li class="menu-item {{ request()->is('products') ? 'active' : '' }}">
                   <a href="{{ route('admin.products') }}" class="menu-link">
-                    <div data-i18n="Productos">Productos</div>
+                    <div data-i18n="Productos / Servicios">Productos / Servicios</div>
                   </a>
                 </li>
                 <li class="menu-item {{ request()->is('warehouses') ? 'active' : '' }}">
@@ -307,7 +307,7 @@
               </ul>
             </li>
             <!-- Extended components -->
-            <li class="menu-item {{ request()->is('inventories-items') || request()->is('contacts-customers') || request()->is('contacts-providers') || request()->is('purchases-expenses') || request()->is('purchases-provider') || request()->is('purchases-general') || request()->is('sales-general') || request()->is('sales-seller') || request()->is('sales-product') ? 'active open' : '' }}">
+            <li class="menu-item {{ request()->is('inventories-items') || request()->is('contacts-customers') || request()->is('contacts-providers') || request()->is('purchases-expenses') || request()->is('purchases-provider') || request()->is('purchases-general') || request()->is('sales-general') || request()->is('sales-seller') || request()->is('sales-product') || request()->is('kardex') ? 'active open' : '' }}">
               <a href="javascript:void(0)" class="menu-link menu-toggle">
                 <i class="menu-icon" data-feather="calendar"></i>
                 <div data-i18n="Reportes">Reportes</div>
@@ -386,6 +386,11 @@
                     </li>
                   </ul>
                 </li>
+                <li class="menu-item {{ request()->is('kardex') ? 'active' : '' }}">
+                      <a href="{{ route('admin.kardex.index') }}" class="menu-link">
+                        <div data-i18n="Kardex Unitario">Kardex Unitario</div>
+                      </a>
+                    </li>
               </ul>
             </li>
             <li class="menu-item {{ request()->is('list-cashes') || request()->is('cuentas') || request()->is('series') || request()->is('business')? 'active open' : '' }}">

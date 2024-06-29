@@ -7,6 +7,7 @@ use App\Models\Buy;
 use App\Models\DetailBuy;
 use App\Models\IdentityDocumentType;
 use App\Models\IgvTypeAffection;
+use App\Models\Kardex;
 use App\Models\PayMode;
 use App\Models\Product;
 use App\Models\Provider;
@@ -364,7 +365,7 @@ class BuyController extends Controller
             ]);
             return;
         }
-        Buy::insert([
+        Buy::create([
             'idtipo_comprobante'    => $idtipo_comprobante,
             'serie'                 => mb_strtoupper($serie),
             'correlativo'           => $correlativo,
@@ -391,7 +392,7 @@ class BuyController extends Controller
         ]);
         $idcompra                   = Buy::latest('id')->first()['id'];
         foreach ($cart['products'] as $product) {
-            DetailBuy::insert([
+            DetailBuy::create([
                 'idcompra'              => $idcompra,
                 'idproducto'            => $product['id'],
                 'cantidad'              => $product['cantidad'],
@@ -409,6 +410,21 @@ class BuyController extends Controller
 
             Product::where('id', $product["id"])->update([
                 "precio_compra" => $product["precio_compra"]
+            ]);
+            
+            $stock = StockProduct::where('idproducto', $product["id"])->where('idalmacen', $idalmacen)->first();
+            Kardex::create([
+                'documentTypeId'    => 206,
+                'userId'            => auth()->user()->id,
+                'warehouseId'       => $idalmacen,
+                'document'     => $product['codigo_interno'], //actualizar a código del sunat
+                'product'      => mb_strtoupper($product['descripcion']),
+                'cant1'      => $product["cantidad"],
+                'price1'      => $product["precio_compra"],
+                'total1'      => ($product['precio_compra'] * $product['cantidad']),
+                'cant3'      => $stock->cantidad,
+                'price3'      => $product["precio_compra"],
+                'total3'      => ($product['precio_compra'] * $stock->cantidad)
             ]);
         }
 

@@ -6,6 +6,7 @@ use App\Models\ArchingCash;
 use App\Models\Billing;
 use App\Models\Business;
 use App\Models\Client;
+use App\Models\Cuentas;
 use App\Models\Currency;
 use App\Models\DetailBilling;
 use App\Models\DetailPayment;
@@ -594,7 +595,7 @@ class QuoteController extends Controller
         $ultimo_correlativo = Quote::latest('id')->first()["correlativo"];
         $correlativo = str_pad($ultimo_correlativo + 1, 8, '0', STR_PAD_LEFT);
 
-        Quote::insert([
+        Quote::create([
             'idtipo_comprobante'    => $idtipo_comprobante,
             'correlativo'           => $correlativo,
             'fecha_emision'         => $fecha_emision,
@@ -621,7 +622,7 @@ class QuoteController extends Controller
         $idquote                    = Quote::latest('id')->first()['id'];
         foreach($cart["products"] as $product)
         {
-            DetailQuote::insert([
+            DetailQuote::create([
                 'idcotizacion'      => $idquote,
                 'idproducto'        => $product['id'],
                 'cantidad'          => $product['cantidad'],
@@ -695,6 +696,7 @@ class QuoteController extends Controller
 
     public function download($id)
     {
+        $data['cuentas']            = Cuentas::latest()->first();
         $data["quote"]              = Quote::where('id', $id)->first();
         $data["business"]           = Business::where('id', 1)->first();
         $data["client"]             = Client::where('id', $data["quote"]["idcliente"])->first();
@@ -761,7 +763,7 @@ class QuoteController extends Controller
         ->size(140)
         ->generate($qr, 'files/billings/qr/' . $name_qr . '.png');
 
-        Billing::insert([
+        Billing::create([
             'idtipo_comprobante'    => $idtipo_comprobante,
             'serie'                 => $serie,
             'correlativo'           => $correlativo,
@@ -793,7 +795,7 @@ class QuoteController extends Controller
             'qr'                    => $name_qr . '.png'
         ]);
         $idfactura                  = Billing::latest('id')->first()['id'];
-        DetailPayment::insert([
+        DetailPayment::create([
             'idtipo_comprobante'    => $idtipo_comprobante,
             'idfactura'             => $idfactura,
             'idpago'                => $quote->modo_pago,
@@ -802,7 +804,7 @@ class QuoteController extends Controller
         ]);
 
         foreach ($detalle as $product) {
-            DetailBilling::insert([
+            DetailBilling::create([
                 'idfacturacion'         => $idfactura,
                 'idproducto'            => $product['idproducto'],
                 'cantidad'              => $product['cantidad'],
@@ -847,6 +849,7 @@ class QuoteController extends Controller
 
     public function gen_pdf($data, $name)
     {
+        $data['cuentas']            = Cuentas::latest()->first();
         $pdf    = PDF::loadView('admin.quotes.pdf', $data)->setPaper('A4', 'portrait');
         return $pdf->save(public_path('files/quotes/' . $name . '.pdf'));
     }
@@ -1104,6 +1107,7 @@ class QuoteController extends Controller
 
         $formatter                  = new NumeroALetras();
         $data['numero_letras']      = $formatter->toWords($factura->total, 2);
+        
         $data['tipo_comprobante']   = TypeDocument::where('id', $factura->idtipo_comprobante)->first();
         $data['vendedor']           = mb_strtoupper(User::where('id', $data['factura']->idusuario)->first()->user);
         $data['payment_modes']      = DetailPayment::select('detail_payments.*', 'pay_modes.descripcion as modo_pago')

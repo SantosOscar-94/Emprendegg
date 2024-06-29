@@ -53,7 +53,7 @@ class WarehouseController extends Controller
         $descripcion            = trim($request->input('descripcion'));
         $direccion           = trim($request->input('direccion'));
         $telofono           = trim($request->input('telefono'));
-        Warehouse::insert([
+        Warehouse::create([
             'descripcion'           => mb_strtoupper($descripcion),
             'direccion'           => mb_strtoupper($direccion),
             'telefono'           => mb_strtoupper($telofono)

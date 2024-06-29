@@ -133,11 +133,19 @@
 
     // Cart
     function load_cart() {
+        divisa = 1;
+
+        if (window.usd) {
+            divisa = window.cambio;
+            console.log(divisa);
+        }
+        
         $.ajax({
             url: "{{ route('admin.load_cart_pos') }}",
             method: 'POST',
             data: {
-                '_token': "{{ csrf_token() }}"
+                '_token': "{{ csrf_token() }}",
+                'cambio': divisa
             },
             success: function(r) {
                 if (!r.status) {
@@ -999,4 +1007,487 @@
 // })
 
 
+</script>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        window.usd = false;
+        fecha = new Date();
+        url = "https://apiperu.dev/api/tipo_de_cambio";
+        data = {
+            fecha: `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}`,
+            moneda: "USD",
+        };
+
+        authorizationToken = "a3e20be04068cd29796811fcdc6a4e79c32124c84fbe072e54afcb4b1d28ea86"; // Replace with your actual token
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authorizationToken}`,
+            },
+            body: JSON.stringify(data),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
+
+            console.log("Cambio: " + data.data.purchase);
+            window.cambio = data.data.purchase;
+            inputCambio = document.getElementById('tipo_cambio');
+            inputCambio.value = "S/ " + data.data.purchase;
+        })
+        .catch((error) => {
+            window.cambio = 3600;
+            inputCambio = document.getElementById('tipo_cambio');
+            inputCambio.value = "S/ 3600";
+            console.error(error);
+        });
+
+        // $.ajax({
+        //     url: "https://v6.exchangerate-api.com/v6/f9cb370829872ab4c1e4c4aa/latest/USD", 
+        //     method: "GET", 
+        //     data: {
+
+        //     },
+        //     success: function(response) {
+        //         //console.log(response);
+        //         console.log("Cambio: " + response.conversion_rates.PEN);
+        //         window.cambio = response.conversion_rates.PEN;
+        //         inputCambio = document.getElementById('tipo_cambio');
+        //         inputCambio.value = window.cambio;
+        //     },
+        //     error: function(error) {
+        //         console.error(error);
+        //     }
+        // });
+
+        // select = document.getElementById('s_tipo_precio');
+        // select.addEventListener('change', function() {
+        //     selectedOption = this.options[select.selectedIndex];
+        //     value = selectedOption.value;
+            
+        //     if (value == 0) {
+        //         elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+        //         elementosConItem.forEach((elemento) => {
+        //             precio = parseFloat(elemento.getAttribute('data-precio'));
+                    
+        //             elemento.innerHTML = "S/" + decimales(precio);
+        //         });
+        //     }else if (value == 1) {
+        //         elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+        //         elementosConItem.forEach((elemento) => {
+        //             precio = parseFloat(elemento.getAttribute('data-precio2'));
+
+        //             elemento.innerHTML = "S/" + decimales(precio);
+        //         });
+        //     } else {
+        //         elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+        //         elementosConItem.forEach((elemento) => {
+        //             precio = parseFloat(elemento.getAttribute('data-precio3'));
+
+        //             elemento.innerHTML = "S/" + decimales(precio);
+        //         });
+        //     }
+        // })
+
+        $('body').on('click', '#btnBuscarFacturas', function() {
+            event.preventDefault();
+            //alert("En proceso...")
+            //return;
+
+            identificacion = $('#identificacion').val()
+            fechaDesde = $('#fechaDesde').val()
+            fechaHasta = $('#fechaHasta').val()
+            tipoComprobante = $('#tipoComprobante').val()
+            product = $('#product').val()
+            //console.log("{{ csrf_token() }}");
+            
+            $.ajax({
+                url: "{{ route('admin.userBillings') }}",
+                method: 'POST',
+                data: {
+                    '_token': "{{ csrf_token() }}",
+                    identificacion: identificacion,
+                    fechaDesde: fechaDesde,
+                    fechaHasta: fechaHasta,
+                    tipoComprobante: tipoComprobante,
+                    product: product
+                },
+                success: function(r) {
+                    //bills = JSON.parse(r.bills[0])
+                    //console.log(r.bills[0]);
+                    $('#bills').html(r.html_bills);
+                },
+                dataType: 'json'
+            }).fail(function(error) {
+                // Handle the error here
+                console.error('Error:', error.responseText);
+                // Perform error-specific actions
+            });
+            return;
+        });
+        
+        $('body').on('click', '#btn_modalventas', function(e) {
+            e.preventDefault();
+            today = new Date().toISOString().slice(0, 10);
+            
+            $('#fechaDesde').val(today);
+
+            today = new Date();
+            today.setDate(today.getDate() + 1);
+            tomorrow = today.toISOString().slice(0, 10);
+            
+            $('#tipoComprobante').val('todos');
+            $('#product').val('0');
+            $('#fechaHasta').val(tomorrow);
+
+            //listarComprobante();
+        });
+
+       
+
+        $('body').on('click', '#btn_tipo_precio', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title:  'Tipo de precios',
+                text:   'Elige el tipo de precio a aplicar',
+                icon:   'info',
+                showCancelButton: true,
+                confirmButtonText:  'Precio publico',
+                denyButtonText:     'Precio al por mayor',
+                cancelButtonText:   'Precio distribuidor',
+                customClass: {
+                    confirmButton:  'btn btn-primary',
+                    denyButton:     'btn btn-primary',
+                    cancelButton:   'btn btn-primary',
+                },
+                buttonsStyling: false,
+                backdrop: false,
+            }).then((result) => {
+                console.log(result);
+                if (result.isConfirmed) {
+                    window.tipoCobro = 1;
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio'));
+                        
+                        elemento.innerHTML = "S/ " + decimales(window.precio);
+                    });
+
+                    $("#kindPrice").html("Precio público");
+                }else if (result.isDenied) {
+                    window.tipoCobro = 2;
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio2'));
+
+                        elemento.innerHTML = "S/ " + decimales(window.precio);
+                    });
+
+                    $("#kindPrice").html("Precio al por mayor");
+                }else if (result.isDismissed) {
+                    window.tipoCobro = 3;
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio3'));
+
+                        elemento.innerHTML = "S/ " + decimales(window.precio);
+                    });
+
+                    $("#kindPrice").html("Precio distribuidor");
+                }
+            });
+        });
+
+        $('body').on('click', '#btn_cambioMoneda', function(e) {
+            if (window.usd) {
+                window.usd = false
+                
+                if (window.tipoCobro == 1) {
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio'));
+                        
+                        elemento.innerHTML = "S/ " + decimales(window.precio);
+                    });
+                }else if (window.tipoCobro == 2) {
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio2'));
+
+                        elemento.innerHTML = "S/ " + decimales(window.precio);
+                    });
+                }else if (window.tipoCobro == 3) {
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio3'));
+
+                        elemento.innerHTML = "S/ " + decimales(window.precio);
+                    });
+                }else{
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio'));
+                        
+                        elemento.innerHTML = "S/ " + decimales(window.precio);
+                    });
+                }
+                
+                $("input[name='precio']").each(function() {
+                    precioSoles = $(this).data('precio');
+                    precioSoles = parseFloat(precioSoles);
+
+                    if (!isNaN(precioSoles)) {
+                        $(this).val(precioSoles.toFixed(2));
+                    } else{
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span.total").each(function() {
+                    precioSoles = parseFloat($(this).data('total'));
+                    if (!isNaN(precioSoles)) {
+                        $(this).html(precioSoles.toFixed(2)); 
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span.gravadas").each(function() {
+                    precioSoles = parseFloat($(this).data('valor'));
+                    if (!isNaN(precioSoles)) {
+                        $(this).html(precioSoles.toFixed(2)); 
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span.igv").each(function() {
+                    precioSoles = parseFloat($(this).data('valor'));
+                    if (!isNaN(precioSoles)) {
+                        $(this).html(precioSoles.toFixed(2)); 
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span.total2").each(function() {
+                    precioSoles = parseFloat($(this).data('valor'));
+                    if (!isNaN(precioSoles)) {
+                        $(this).html(precioSoles.toFixed(2)); 
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span[name='moneda']").each(function() {
+                    $(this).html("S/ ");
+                });
+
+                $("#btn_cambioMoneda").html("<i class=\"fa-solid fa-dollar-sign fa-2x\"></i>");
+                $("#btn_cambioMoneda").removeClass("btn-warning");
+                $("#btn_cambioMoneda").removeClass("btn-success");
+                $("#btn_cambioMoneda").addClass("btn-success");
+                
+            } else {
+
+                window.usd = true;
+                
+                if (window.tipoCobro == 1) {
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio'));
+                        
+                        elemento.innerHTML = "$ " + decimales((window.precio / window.cambio));
+                    });
+                }else if (window.tipoCobro == 2) {
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio2'));
+
+                        elemento.innerHTML = "$ " + decimales((window.precio / window.cambio));
+                    });
+                }else if (window.tipoCobro == 3) {
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio3'));
+
+                        elemento.innerHTML = "$ " + decimales((window.precio / window.cambio));
+                    });
+                }else{
+                    elementosConItem = document.querySelectorAll('[id^="itemPrice"]');
+
+                    elementosConItem.forEach((elemento) => {
+                        window.precio = parseFloat(elemento.getAttribute('data-precio'));
+                        
+                        elemento.innerHTML = "$ " + decimales((window.precio / window.cambio));
+                    });
+                }
+                
+                $("input[name='precio']").each(function() {
+                    precioSoles = parseFloat($(this).data('precio'));
+
+                    if (!isNaN(precioSoles)) {
+                        precioUSD = (precioSoles / window.cambio);
+
+                        $(this).val(precioUSD.toFixed(2));
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span.total").each(function() {
+                    precioSoles = parseFloat($(this).data('total'));
+
+                    if (!isNaN(precioSoles)) {
+                        precioUSD = precioSoles / window.cambio;
+
+                        $(this).html(precioUSD.toFixed(2)); 
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span.gravadas").each(function() {
+                    precioSoles = parseFloat($(this).data('valor'));
+
+                    if (!isNaN(precioSoles)) {
+                        precioUSD = precioSoles / window.cambio;
+
+                        $(this).html(precioUSD.toFixed(2)); 
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span.igv").each(function() {
+                    precioSoles = parseFloat($(this).data('valor'));
+
+                    if (!isNaN(precioSoles)) {
+                        precioUSD = precioSoles / window.cambio;
+
+                        $(this).html(precioUSD.toFixed(2)); 
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+                
+                $("span.total2").each(function() {
+                    precioSoles = parseFloat($(this).data('valor'));
+
+                    if (!isNaN(precioSoles)) {
+                        precioUSD = precioSoles / window.cambio;
+
+                        $(this).html(precioUSD.toFixed(2)); 
+                    } else {
+                        alert("Error al realizar el cambio de moneda.")
+                    }
+                });
+
+                $("span[name='moneda']").each(function() {
+                    $(this).html("$ ");
+                });
+
+                $("#btn_cambioMoneda").html("<b  style=\"font-size: 24px;\">S/</b>");
+                $("#btn_cambioMoneda").removeClass("btn-success");
+                $("#btn_cambioMoneda").addClass("btn-warning");
+            }
+            
+        });
+    });
+
+    function addProduct(id, precio, cliente, idCliente, dniCliente){
+        console.log(idCliente);
+        addOption(idCliente, dniCliente, cliente)
+
+        $.ajax({
+            url: "{{ route('admin.add_product_pos') }}",
+            method: 'POST',
+            data: {
+                '_token': "{{ csrf_token() }}",
+                id: id,
+                cantidad: 1,
+                precio: precio,
+                option: 1
+            },
+            beforeSend: function() {
+                block_content(`.card[id="${id}"]`);
+            },
+            success: function(r) {
+                if (!r.status) {
+                    close_block(`.card[id="${id}"]`);
+                    toast_msg(r.msg, r.type);
+                    return;
+
+                }
+                close_block(`.card[id="${id}"]`);
+                toast_msg(r.msg, r.type);
+                load_cart();
+            },
+            dataType: 'json'
+        });
+        return;
+    }
+
+    function addOption(idCliente, dniCliente, cliente) {
+        select = document.getElementById('dni_ruc');
+        newOption = document.createElement('option');
+
+        newOption.text = dniCliente + ' - ' + cliente;
+        newOption.value = idCliente;
+        newOption.selected = true;
+
+        options = select.options;
+        // for (let i = 0; i < options.length; i++) {
+        //     options[i].selected = false;
+        //     if (options[i].selected) {
+        //         console.log(options[i]);
+        //     }
+            
+        // }
+
+        select.add(newOption, select.firstChild);
+
+        //userOption = document.getElementById('user');
+
+        //if (condition) {
+        // Modify option content
+        //userOption.text = dniCliente + ' - ' + cliente; // Replace with your desired text
+        //userOption.value = idCliente; // Replace with your desired value
+        window.userBill = cliente;
+        //} else {
+        // Remove the option
+        //userOption.parentNode.removeChild(userOption);
+        //}
+    }
+
+    function decimales(n) {
+        numeroFormateado = n.toFixed(2);
+        partes = numeroFormateado.split('.');
+
+        if (partes.length === 1) {
+            return `${partes[0]}.00`;
+        }
+
+        const decimal = partes[1].padEnd(2, '0');
+        return `${partes[0]}.${decimal}`;
+    }    
 </script>
